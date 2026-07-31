@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.astrail.eye.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "GuiRenderStateMixin",
+    "KeyboardInputMixin",
+    "MinecraftPauseMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

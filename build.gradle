@@ -1,0 +1,77 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+plugins {
+    id "net.fabricmc.fabric-loom" version "${loom_version}"
+    id "maven-publish"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation "com.google.code.gson:gson:2.13.1"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 25
+    options.compilerArgs.addAll(["-Xlint:deprecation", "-Xlint:unchecked"])
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+def gameModsDir = file("D:/minecraft/.minecraft/versions/26.2 test/mods")
+
+def syncGameJar = {
+    def source = tasks.named("jar").flatMap { it.archiveFile }.get().asFile
+    def target = new File(gameModsDir, source.name)
+    try {
+        gameModsDir.mkdirs()
+        gameModsDir.listFiles().findAll {
+            it.name.startsWith("astrail-eye") && it.name.endsWith(".jar")
+        }.each {
+            if (!it.delete()) logger.warn("Could not delete stale jar {}", it)
+        }
+        Files.copy(
+            source.toPath(), target.toPath(),
+            StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES
+        )
+        logger.lifecycle("Synced {} -> {}", source.name, target)
+    } catch (IOException e) {
+        logger.warn("Skipped game mod sync (is the game running?): {}", e.message)
+    }
+}
+
+tasks.register("syncJarToGame") {
+    group = "build"
+    description = "Copies the built jar into the 26.2 test instance mods folder."
+    dependsOn tasks.named("jar")
+    doLast syncGameJar
+}
+
+tasks.named("build").configure {
+    doLast syncGameJar
+}
+

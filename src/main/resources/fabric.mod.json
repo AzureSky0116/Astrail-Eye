@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "astrail-eye",
+  "version": "${version}",
+  "name": "Astrail Eye",
+  "description": "Standalone Auto Eye farming mod for Minecraft 26.2 (Stationary mode).",
+  "icon": "assets/astrail-eye/icon.png",
+  "authors": [
+    "Astrail Eye"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.astrail.eye.AstrailEyeClient"
+    ]
+  },
+  "mixins": [
+    "astraileye.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "fabric-api": ">=0.154.2+26.2",
+    "minecraft": "~26.2",
+    "java": ">=25"
+  }
+}
